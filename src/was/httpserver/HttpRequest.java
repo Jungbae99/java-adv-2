@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static util.MyLogger.log;
 
 public class HttpRequest {
 
@@ -22,12 +23,14 @@ public class HttpRequest {
         parseRequestLine(reader);
         parseHeaders(reader);
         // 메시지 바디는 이후에 처리
-//        parseBody(reader);
+        parseBody(reader);
     }
+
 
 
     // GET /search?q=hello HTTP/1.1
     // Host: localhost:12345
+
     private void parseRequestLine(BufferedReader reader) throws IOException {
         String requestLine = reader.readLine();
         if (requestLine == null) {
@@ -49,10 +52,10 @@ public class HttpRequest {
             parseQueryParameters(pathParts[1]);
         }
     }
-
     // Host: localhost:12345
     // Connection: keep-alive
     // Cache-Control: max-age=0
+
     private void parseHeaders(BufferedReader reader) throws IOException {
         String line;
         while (!(line = reader.readLine()).isEmpty()) {
@@ -70,6 +73,26 @@ public class HttpRequest {
             String key = URLDecoder.decode(keyValue[0], UTF_8);
             String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], UTF_8) : "";
             queryParameters.put(key, value);
+        }
+    }
+
+    private void parseBody(BufferedReader reader) throws IOException {
+        if (!headers.containsKey("Content-Length")) {
+            return;
+        }
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] bodyChars = new char[contentLength];
+        int read = reader.read(bodyChars);
+        if (read != contentLength) {
+            throw new IOException("EOF: Invalid request body");
+        }
+
+        String body = new String(bodyChars);
+        log("HTTP Message Body: " + body);
+
+        String contentType = headers.get("Content-Type");
+        if ("application/x-www-form-urlencoded".equals(contentType)) {
+            parseQueryParameters(body);
         }
     }
 

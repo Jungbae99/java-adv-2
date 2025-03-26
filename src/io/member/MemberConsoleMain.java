@@ -11,9 +11,9 @@ import java.util.Scanner;
 public class MemberConsoleMain {
 
 //    private static final MemberRepository repository = new MemoryMemberRepository();
-//    private static final MemberRepository repository = new FileMemberRepository();
+    private static final MemberRepository repository = new FileMemberRepository();
 //    private static final MemberRepository repository = new DataMemberRepository();
-    private static final MemberRepository repository = new ObjectMemberRepository();
+//    private static final MemberRepository repository = new ObjectMemberRepository();
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
